@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Как мы ускорили CI в четыре раза / Хабр</title>
+<meta property="og:title" content="Как мы ускорили CI в четыре раза">
+<meta property="og:site_name" content="Хабр">
+<meta name="description" content="Рассказываем про кэширование зависимостей">
+<script type="application/ld+json">{"@context":"http://schema.org","@type":"Article","headline":"Как мы ускорили CI в четыре раза","datePublished":"2026-03-12T10:15:00+03:00","author":{"@type":"Person","name":"ivan_petrov"}}</script>
+</head>
+<body>
+<div id="app">
+  <header class="tm-header"><nav><a href="/ru/feed/">Моя лента</a><a href="/ru/articles/">Все потоки</a><a href="/ru/news/">Новости</a></nav></header>
+  <div class="tm-page__wrapper">
+    <main class="tm-layout__container">
+      <article class="tm-article-presenter__content">
+        <div class="tm-article-snippet tm-article-snippet__author">
+          <span class="tm-user-info"><a class="tm-user-info__username" href="/ru/users/ivan_petrov/">ivan_petrov</a></span>
+          <span class="tm-article-datetime-published"><time datetime="2026-03-12T07:15:00.000Z" title="2026-03-12, 10:15">12 мар в 10:15</time></span>
+        </div>
+        <h1 class="tm-title tm-title_h1" lang="ru"><span>Как мы ускорили CI в четыре раза</span></h1>
+        <div class="tm-article-labels"><span>Уровень сложности: Средний</span><span>Время на прочтение: 7 мин</span></div>
+        <div class="tm-article-body">
+          <div id="post-content-body">
+            <div class="article-formatted-body article-formatted-body article-formatted-body_version-2">
+              <div xmlns="http://www.w3.org/1999/xhtml">
+                <p>Год назад сборка нашего монорепозитория занимала сорок минут. Разработчики отправляли пулреквест и уходили пить кофе, а очередь в CI к вечеру растягивалась на час. В этой статье расскажу, как мы сократили время сборки до десяти минут без покупки нового железа.</p>
+                <h2>Где терялось время</h2>
+                <p>Мы начали с профилирования пайплайна. Оказалось, что почти половина времени уходит на установку зависимостей: каждый джоб заново скачивал пакеты из внешнего реестра, хотя файл блокировки менялся раз в неделю.</p>
+                <ul>
+                  <li>установка зависимостей — 18 минут;</li>
+                  <li>сборка Docker-образов — 12 минут;</li>
+                  <li>тесты — 10 минут.</li>
+                </ul>
+                <h2>Кэширование зависимостей</h2>
+                <p>Первым шагом мы включили кэш по хэшу файла блокировки. Если файл не менялся, джоб берёт готовую папку с пакетами из кэша. Это сразу сэкономило пятнадцать минут на каждом запуске.</p>
+                <pre><code class="python">cache:
+  key: deps-${{ hashFiles('poetry.lock') }}
+  paths: [.venv]</code></pre>
+                <h2>Параллельные тесты</h2>
+                <p>Тесты мы разбили на четыре шарда по истории длительности. Самые медленные интеграционные тесты теперь запускаются в отдельном джобе, и общее время прогона сократилось с десяти до трёх минут.</p>
+                <p>Итог: сорок минут превратились в десять, а очередь в CI исчезла. Главный вывод — прежде чем оптимизировать, измерьте, куда уходит время.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tm-article-poll"><p>Только зарегистрированные пользователи могут участвовать в опросе. Войдите, пожалуйста.</p></div>
+        <div class="tm-article-presenter__footer"><p>Теги: ci, devops, кэширование. Хабы: DevOps, Системное администрирование.</p></div>
+      </article>
+      <section class="tm-comments">
+        <h2>Комментарии 42</h2>
+        <div class="tm-comment"><p>Отличная статья, но у нас кэш постоянно протухал из-за другой версии рантайма и мы так и не победили это за полгода.</p></div>
+        <div class="tm-comment"><p>А пробовали удалённый кэш сборки? Нам он дал ещё двукратное ускорение на больших проектах.</p></div>
+      </section>
+    </main>
+    <aside class="tm-layout__sidebar"><div class="tm-sexy-sidebar"><h3>Читают сейчас</h3><a href="/ru/articles/1/">Почему ваш монолит тормозит</a><a href="/ru/articles/2/">Десять советов по Kubernetes</a></div></aside>
+  </div>
+  <footer class="tm-footer"><p>© 2006–2026 «Хабр»</p></footer>
+</div>
+</body>
+</html>
